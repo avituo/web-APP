@@ -95,7 +95,31 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.deleteContact = function(id) {
-        alert('Apagar contato com ID: ' + id);
+        if (confirm("Tem certeza de que deseja apagar este contato?")) {
+            showLoader();
+            fetch(`https://deepskyblue-boar-319363.hostingersite.com/contacts/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Erro ao apagar o contato.");
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    alert('Contato apagado com sucesso.')
+                    location.reload();
+                })
+                .catch(error => {
+                    alert(error.message);
+                })
+                .finally(() => {
+                    hideLoader();
+                });
+        }
     };
 
     function resetContactForm() {

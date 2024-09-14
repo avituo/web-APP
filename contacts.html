@@ -82,7 +82,41 @@
       </div>
     </div>
   </div>
-
+  <!-- Modal para edição de contato -->
+  <div class="modal fade" id="editContactModal" tabindex="-1" aria-labelledby="editContactModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editContactModalLabel">Editar Contato</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="editContactForm">
+            <input type="hidden" id="editContactId">
+            <div class="mb-3">
+              <label for="editUserIdSelect" class="form-label">Usuário</label>
+              <select id="editUserIdSelect" class="form-select">
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editContactType" class="form-label">Tipo de Contato</label>
+              <select class="form-select" id="editContactType" required>
+                <option value="" disabled>Selecione um tipo</option>
+                <option value="Whatsapp">WhatsApp</option>
+                <option value="Telefone">Telefone</option>
+                <option value="Email">E-mail</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="editContactValue" class="form-label">Valor do Contato</label>
+              <input type="text" class="form-control" id="editContactValue" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar alterações</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    name: 'updatedName'
+                    name: updatedName
                 })
             })
                 .then(response => {

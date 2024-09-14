@@ -1,9 +1,7 @@
-// URL da API
-const apiBaseUrl = 'http://localhost:8080';
+function showLoader() {
+    document.getElementById('loader').classList.remove('d-none');
+}
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('helloWorldBtn').addEventListener('click', () => {
-        console.log('Hello World!');
-    });
-
-});
+function hideLoader() {
+    document.getElementById('loader').classList.add('d-none');
+}

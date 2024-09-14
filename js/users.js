@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     window.deleteUser = function(id) {
-        if (confirm("Tem certeza de que deseja apagar este usuário?")) {
+        if (confirm("Tem certeza de que deseja apagar este usuário? (Todos seus contatos serão apagados no processo)")) {
             showLoader();
             fetch(`https://deepskyblue-boar-319363.hostingersite.com/users/${id}`, {
                 method: "DELETE",
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return response.json();
                 })
                 .then(() => {
-                    showToast("Sucesso", "Usuário apagado com sucesso.", "success");
+                    alert('Usuário apagado com sucesso.')
                     location.reload();
                 })
                 .catch(error => {
@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    name: updatedName
+                    name: 'updatedName'
                 })
             })
                 .then(response => {
@@ -145,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     const data = JSON.parse(text);
                     console.log('Usuário criado com sucesso:', data);
-                    var createUserModal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
+                    let createUserModal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
                     createUserModal.hide();
                     location.reload();
                 } catch (e) {
@@ -160,6 +160,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .finally(() => {
                 hideLoader();
             });
+    });
+
+    document.getElementById('createUserModal').addEventListener('show.bs.modal', function () {
+        document.getElementById('newUserName').value = '';
     });
 
     fetchUsers();

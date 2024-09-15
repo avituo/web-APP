@@ -27,6 +27,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function populateEditUserSelect(users) {
+        const editUserSelect = document.getElementById('editUserIdSelect');
+        editUserSelect.innerHTML = '<option value="" disabled selected>Selecione um usuário</option>';
+
+        users.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.id;
+            option.text = user.name;
+            editUserSelect.appendChild(option);
+        });
+    }
+
+
     function fetchContacts() {
         showLoader();
 
@@ -90,8 +103,108 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    document.getElementById('editContactModal').addEventListener('shown.bs.modal', function () {
+        const contactType = document.getElementById('editContactType').value;
+        const contactValueInput = document.getElementById('editContactValue');
+        document.getElementById('editUserIdSelect');
+        if (contactType === 'Whatsapp' || contactType === 'Telefone') {
+            applyMask(contactValueInput);
+        } else if (contactType === 'Email') {
+            removeMask(contactValueInput);
+        }
+
+        // Recarregar usuários e atualizar o select
+        fetch('https://deepskyblue-boar-319363.hostingersite.com/users')
+            .then(response => response.json())
+            .then(users => {
+                populateEditUserSelect(users);
+                users.forEach(user => {
+                    usersMap[user.id] = user.name;
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao buscar usuários:', error);
+            });
+
+        const contactId = document.getElementById('editContactId').value;
+        if (contactId) {
+            fetch(`https://deepskyblue-boar-319363.hostingersite.com/contacts/${contactId}`)
+                .then(response => response.json())
+                .then(contact => {
+                    document.getElementById('editContactType').value = contact.type;
+                    document.getElementById('editContactValue').value = contact.value;
+
+                    if (contact.type === 'Whatsapp' || contact.type === 'Telefone') {
+                        applyMask(contactValueInput);
+                    } else if (contact.type === 'Email') {
+                        removeMask(contactValueInput);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar dados do contato para edição:', error);
+                });
+        }
+    });
+
+    document.getElementById('editContactModal').addEventListener('hidden.bs.modal', function () {
+        removeMask(document.getElementById('editContactValue'));
+    });
+
+    document.getElementById('editContactForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const id = document.getElementById('editContactId').value;
+        const contactType = document.getElementById('editContactType').value;
+        const contactValue = document.getElementById('editContactValue').value;
+
+        if (!contactType) {
+            alert('Por favor, selecione um tipo de contato!');
+            return;
+        }
+
+        showLoader();
+
+        fetch(`https://deepskyblue-boar-319363.hostingersite.com/contacts/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                type: contactType,
+                value: contactValue
+            })
+        })
+            .then(response => response.json())
+            .then(() => {
+                alert('Contato atualizado com sucesso!');
+                let editContactModal = bootstrap.Modal.getInstance(document.getElementById('editContactModal'));
+                editContactModal.hide();
+                fetchContacts();
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar o contato:', error);
+                alert('Erro ao atualizar o contato.');
+            })
+            .finally(() => {
+                hideLoader();
+            });
+    });
+
+
     window.editContact = function(id) {
-        alert('Editar contato com ID: ' + id);
+        fetch(`https://deepskyblue-boar-319363.hostingersite.com/contacts/${id}`)
+            .then(response => response.json())
+            .then(contact => {
+                document.getElementById('editContactId').value = contact.id;
+                document.getElementById('editContactType').value = contact.type;
+                document.getElementById('editContactValue').value = contact.value;
+
+                let editContactModal = new bootstrap.Modal(document.getElementById('editContactModal'));
+                editContactModal.show();
+            })
+            .catch(error => {
+                console.error('Erro ao buscar dados do contato para edição:', error);
+            });
     };
 
     window.deleteContact = function(id) {
@@ -132,33 +245,42 @@ document.addEventListener('DOMContentLoaded', function() {
         removeMask();
     }
 
-    function applyMask() {
-        const contactValue = document.getElementById('contactValue');
-        if (contactValue) {
+    function applyMask(inputElement) {
+        if (inputElement) {
             try {
-                Inputmask("(99) 99999-9999").mask(contactValue);
+                Inputmask("(99) 99999-9999").mask(inputElement);
             } catch (error) {
                 console.error('Erro ao aplicar máscara:', error);
             }
         }
     }
 
-    function removeMask() {
-        const contactValue = document.getElementById('contactValue');
-        if (contactValue) {
+    function removeMask(inputElement) {
+        if (inputElement) {
             try {
-                Inputmask.remove(contactValue);
+                Inputmask.remove(inputElement);
             } catch (error) {
                 console.error('Erro ao remover máscara:', error);
             }
         }
     }
 
+    document.getElementById('editContactType').addEventListener('change', function () {
+        document.getElementById('editContactValue').value = '';
+        const contactType = this.value;
+        const contactValueInput = document.getElementById('editContactValue');
+
+        if (contactType === 'Whatsapp' || contactType === 'Telefone') {
+            applyMask(contactValueInput);
+        } else if (contactType === 'Email') {
+            removeMask(contactValueInput);
+        }
+    });
+
     document.getElementById('contactType').addEventListener('change', function() {
         const contactType = this.value;
         const contactValue = document.getElementById('contactValue');
 
-        // Clear the contact value field
         if (contactValue) {
             contactValue.value = '';
         }
@@ -174,15 +296,26 @@ document.addEventListener('DOMContentLoaded', function() {
         resetContactForm();
     });
 
-    // Apply or remove mask when modal is shown
     document.getElementById('createContactModal').addEventListener('shown.bs.modal', function () {
+        fetch('https://deepskyblue-boar-319363.hostingersite.com/users')
+            .then(response => response.json())
+            .then(users => {
+                populateUserSelect(users);
+                users.forEach(user => {
+                    usersMap[user.id] = user.name;
+                });
+            })
+            .catch(error => {
+                console.error('Erro ao buscar usuários:', error);
+            });
+
         const contactType = document.getElementById('contactType').value;
         if (contactType === 'Whatsapp' || contactType === 'Telefone') {
             applyMask();
         }
     });
 
-    // Remove mask when modal is hidden
+
     document.getElementById('createContactModal').addEventListener('hidden.bs.modal', function () {
         removeMask();
         resetContactForm();
@@ -202,11 +335,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (!contactType) {
             alert('Por favor, selecione um tipo de contato!');
-            return;
-        }
-
-        if (contactType === 'email' && !validateEmail(contactValue)) {
-            alert('Por favor, insira um e-mail válido!');
             return;
         }
 
